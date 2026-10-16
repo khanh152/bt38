@@ -31,7 +31,6 @@
             align-items: center;
             justify-content: space-between;
             padding: 20px;
-            transition: background 0.5s ease;
         }
 
         header {
@@ -109,6 +108,7 @@
             overflow: hidden;
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
             cursor: crosshair;
+            transition: background-color 0.5s ease;
         }
 
         /* Mục tiêu hình tròn nhỏ */
@@ -240,7 +240,6 @@
             text-align: center;
         }
 
-        /* Responsive cho thiết bị nhỏ */
         @media (max-width: 650px) {
             #arena {
                 width: 100%;
@@ -301,7 +300,6 @@
     </footer>
 
     <script>
-        // Khai báo các phần tử DOM
         const arena = document.getElementById('arena');
         const scoreDisplay = document.getElementById('score');
         const timerDisplay = document.getElementById('timer');
@@ -309,42 +307,33 @@
         const startBtn = document.getElementById('btn-action');
         const timeSelect = document.getElementById('time-options');
 
-        // Biến trạng thái trò chơi
         let score = 0;
         let timeLeft = 30;
         let isPlaying = false;
         let gameInterval = null;
-        let moveInterval = null;
         let currentTarget = null;
 
         const ARENA_WIDTH = 600;
         const ARENA_HEIGHT = 400;
         const TARGET_SIZE = 40;
 
-        // Hàm bắt đầu trò chơi (Cập nhật lấy thời gian tùy chọn từ select)
         function startGame() {
             if (isPlaying) return;
 
-            // Đọc thời gian được chọn từ dropdown
             timeLeft = parseInt(timeSelect.value);
-
-            // Reset trạng thái
             score = 0;
             isPlaying = true;
             scoreDisplay.textContent = score;
             timerDisplay.textContent = timeLeft;
             timerBox.classList.remove('warning');
             startBtn.disabled = true;
-            timeSelect.disabled = true; // Khóa lựa chọn thời gian khi đang chơi
+            timeSelect.disabled = true;
 
-            // Xóa màn hình chờ hoặc kết quả cũ bên trong arena
             const overlay = document.getElementById('start-screen') || document.getElementById('result-screen');
             if (overlay) overlay.remove();
 
-            // Sinh mục tiêu đầu tiên
             spawnTarget();
 
-            // Kích hoạt bộ đếm ngược thời gian
             gameInterval = setInterval(() => {
                 timeLeft--;
                 timerDisplay.textContent = timeLeft;
@@ -355,18 +344,6 @@
 
                 if (timeLeft <= 0) {
                     endGame();
-                }
-            }, 1000);
-
-            resetMoveTimer();
-        }
-
-        function resetMoveTimer() {
-            if (moveInterval) clearInterval(moveInterval);
-            
-            moveInterval = setInterval(() => {
-                if (isPlaying) {
-                    spawnTarget();
                 }
             }, 1000);
         }
@@ -388,6 +365,7 @@
             target.style.left = randomX + 'px';
             target.style.top = randomY + 'px';
 
+            // Chỉ khi click vào mục tiêu thì mới cộng điểm và đổi vị trí
             target.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (!isPlaying) return;
@@ -396,18 +374,15 @@
                 scoreDisplay.textContent = score;
 
                 spawnTarget();
-                resetMoveTimer();
             });
 
             arena.appendChild(target);
             currentTarget = target;
         }
 
-        // Hàm kết thúc trò chơi (Khóa thao tác và hiển thị tổng điểm)
         function endGame() {
             isPlaying = false;
             clearInterval(gameInterval);
-            clearInterval(moveInterval);
 
             if (currentTarget) {
                 currentTarget.remove();
@@ -417,7 +392,7 @@
             timerBox.classList.remove('warning');
             startBtn.disabled = false;
             startBtn.textContent = "Chơi Lại";
-            timeSelect.disabled = false; // Mở lại lựa chọn thời gian
+            timeSelect.disabled = false;
 
             let feedback = "Cần cố gắng luyện tập thêm!";
             if (score >= 25) {
@@ -440,14 +415,13 @@
             arena.appendChild(resultScreen);
         }
 
-        // 1. Chức năng đổi màu nền trò chơi ngẫu nhiên
+        // 1. Chức năng đổi màu nền TRONG KHU VỰC CHƠI (#arena)
         function changeBackgroundColor() {
             const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
-            const randomColor2 = '#' + Math.floor(Math.random() * 16777215).toString(16);
-            document.body.style.background = `linear-gradient(135deg, ${randomColor} 0%, ${randomColor2} 100%)`;
+            arena.style.backgroundColor = randomColor;
         }
 
-        // 2. Chức năng nút Người chơi (hiển thị mã sinh viên)
+        // 2. Chức năng nút Người chơi
         function showPlayerInfo() {
             alert("Thông tin người chơi:\n- Họ tên: Đoàn Duy Khánh\n- Mã sinh viên: 241A010021\n- Lớp: 261INT440701");
         }
